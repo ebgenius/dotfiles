@@ -1,0 +1,11 @@
+[Unit]
+Description=Barrier
+Service After=network.target
+
+[Service]
+Type=simple
+ExecStart=/home/eugenio/workspaces/dotfiles/barrier-start.sh
+Restart=always  
+
+[Install]
+WantedBy=multi-user.target
