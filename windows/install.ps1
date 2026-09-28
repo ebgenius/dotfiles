@@ -107,11 +107,12 @@ foreach ($p in "$docs\WindowsPowerShell\Microsoft.PowerShell_profile.ps1",
 }
 # Profiles are scripts; the Windows client default policy (Restricted) would block them.
 if ((Get-ExecutionPolicy -Scope CurrentUser) -in 'Undefined', 'Restricted') {
-    try {
-        Set-ExecutionPolicy -Scope CurrentUser RemoteSigned -Force
+    # 5.1 can throw "Security error." even though the policy was written, so check the result.
+    try { Set-ExecutionPolicy -Scope CurrentUser RemoteSigned -Force } catch { }
+    if ((Get-ExecutionPolicy -Scope CurrentUser) -eq 'RemoteSigned') {
         Write-Host '    execution policy (CurrentUser) -> RemoteSigned'
-    } catch {
-        Write-Warning "Could not set execution policy (Group Policy?): $($_.Exception.Message)"
+    } else {
+        Write-Warning 'Could not set execution policy; PowerShell profiles may not run.'
     }
 }
 
