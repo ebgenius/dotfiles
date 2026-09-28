@@ -1,0 +1,6 @@
+# Bash reads these on Windows too; CRLF breaks them ($'\r': command not found)
+*.sh           text eol=lf
+.bash*         text eol=lf
+.zshrc*        text eol=lf
+*.service      text eol=lf
+*.ps1          text eol=crlf
