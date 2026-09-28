@@ -1,0 +1,29 @@
+# ----------------------
+# SSH agent on a fixed socket (shared with PowerShell and VS Code)
+# ----------------------
+# SSH_AUTH_SOCK is also set as a Windows user env var (C:/Users/<you>/.ssh/agent.sock),
+# so any process (VS Code, PowerShell, git.exe) finds the same agent.
+export SSH_AUTH_SOCK="$HOME/.ssh/agent.sock"
+
+ssh_agent_ensure() {
+    ssh-add -l >/dev/null 2>&1
+    local rc=$?  # 0 = agent up with keys, 1 = agent up but empty, 2 = no agent
+    if [ $rc -eq 2 ]; then
+        rm -f "$SSH_AUTH_SOCK"  # stale socket from a dead agent
+        eval "$(ssh-agent -s -a "$SSH_AUTH_SOCK")" >/dev/null
+    fi
+    if [ $rc -ne 0 ]; then
+        local keys=() k
+        for k in ~/.ssh/id_*; do
+            [ -f "$k" ] && [[ "$k" != *.pub ]] && keys+=("$k")
+        done
+        [ ${#keys[@]} -gt 0 ] && ssh-add "${keys[@]}" 2>/dev/null
+    fi
+}
+
+ssh_test() {
+    ssh -T git@github.com
+    ssh -T git@gitlab.tudelft.nl
+}
+
+ssh_agent_ensure
